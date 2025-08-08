@@ -5,18 +5,19 @@ export class EnhancedAlgorithmPrediction {
   static predictAlgorithm(text: string): AlgorithmPrediction[] {
     const predictions: AlgorithmPrediction[] = [];
     
-    // Use ML prediction first
-    const mlPrediction = MLTrainingSystem.predictWithML(text);
-    if (mlPrediction.confidence > 0.3) {
-      predictions.push({
-        algorithm: `${mlPrediction.algorithm} (ML)`,
-        confidence: mlPrediction.confidence,
-        reasoning: `Machine learning model prediction based on ${MLTrainingSystem.getModelStats().training_count} training examples`
-      });
+    // Use ML prediction first if available
+    try {
+      const mlPrediction = MLTrainingSystem.predictWithML(text);
+      if (mlPrediction.confidence > 0.2) {
+        predictions.push({
+          algorithm: `${mlPrediction.algorithm} (ML)`,
+          confidence: mlPrediction.confidence,
+          reasoning: `Machine learning model prediction based on ${MLTrainingSystem.getModelStats().training_count} training examples`
+        });
+      }
+    } catch (error) {
+      console.log('ML prediction not available, using rule-based');
     }
-    
-    // Analyze text characteristics
-    const analysis = this.analyzeText(text);
     
     // Base64 detection
     if (this.isBase64(text)) {
@@ -41,7 +42,7 @@ export class EnhancedAlgorithmPrediction {
       predictions.push({
         algorithm: 'Binary',
         confidence: 0.95,
-        reasoning: 'Contains only binary digits (0 and 1)'
+        reasoning: 'Contains only binary digits (0 and 1) with proper byte alignment'
       });
     }
     
@@ -50,8 +51,14 @@ export class EnhancedAlgorithmPrediction {
       predictions.push({
         algorithm: 'URL Encoding',
         confidence: 0.85,
-        reasoning: 'Contains percent-encoded characters'
+        reasoning: 'Contains percent-encoded characters (%XX format)'
       });
+    }
+    
+    // Hash function detection
+    const hashPrediction = this.detectHashAlgorithm(text);
+    if (hashPrediction) {
+      predictions.push(hashPrediction);
     }
     
     // AES/DES detection (CryptoJS format)
@@ -68,65 +75,60 @@ export class EnhancedAlgorithmPrediction {
       predictions.push({
         algorithm: 'RSA',
         confidence: 0.85,
-        reasoning: 'Matches RSA encrypted format pattern'
+        reasoning: 'Matches RSA encrypted format or PEM structure'
       });
     }
     
     // Classical cipher detection
-    const classicalPredictions = this.predictClassicalCiphers(text, analysis);
+    const classicalPredictions = this.predictClassicalCiphers(text);
     predictions.push(...classicalPredictions);
     
-    // Hash detection
-    const hashPredictions = this.predictHashAlgorithms(text);
-    predictions.push(...hashPredictions);
+    // Base32 detection
+    if (this.isBase32(text)) {
+      predictions.push({
+        algorithm: 'Base32',
+        confidence: 0.85,
+        reasoning: 'Matches Base32 character set (A-Z, 2-7) with proper padding'
+      });
+    }
     
-    // Encoding detection
-    const encodingPredictions = this.predictEncodingAlgorithms(text);
-    predictions.push(...encodingPredictions);
+    // Base58 detection
+    if (this.isBase58(text)) {
+      predictions.push({
+        algorithm: 'Base58',
+        confidence: 0.8,
+        reasoning: 'Matches Base58 character set (excludes 0, O, I, l for clarity)'
+      });
+    }
+    
+    // ASCII detection
+    if (this.isASCII(text)) {
+      predictions.push({
+        algorithm: 'ASCII',
+        confidence: 0.8,
+        reasoning: 'Space-separated numbers in printable ASCII range (32-126)'
+      });
+    }
+    
+    // HTML entity detection
+    if (this.isHTMLEncoded(text)) {
+      predictions.push({
+        algorithm: 'HTML Entities',
+        confidence: 0.9,
+        reasoning: 'Contains HTML entity references (&amp;, &lt;, etc.)'
+      });
+    }
+    
+    // If no strong predictions, add generic ones
+    if (predictions.length === 0 || predictions.every(p => p.confidence < 0.5)) {
+      predictions.push({
+        algorithm: 'Unknown/Custom Cipher',
+        confidence: 0.3,
+        reasoning: 'Text pattern does not match known algorithm signatures'
+      });
+    }
     
     return predictions.sort((a, b) => b.confidence - a.confidence);
-  }
-  
-  // Create training data for ML system
-  static createTrainingData(
-    inputText: string, 
-    predictedAlgorithm: string, 
-    actualAlgorithm: string, 
-    confidence: number,
-    userFeedback: 'correct' | 'incorrect'
-  ): void {
-    const features = MLTrainingSystem.extractFeatures(inputText);
-    const isCorrect = userFeedback === 'correct';
-    
-    MLTrainingSystem.trainModel({
-      input_text: inputText,
-      predicted_algorithm: predictedAlgorithm,
-      actual_algorithm: actualAlgorithm,
-      confidence,
-      features,
-      is_correct: isCorrect,
-      user_feedback: userFeedback
-    });
-  }
-  
-  // Get ML model statistics
-  static getMLStats() {
-    return MLTrainingSystem.getModelStats();
-  }
-  
-  private static analyzeText(text: string) {
-    return {
-      length: text.length,
-      uniqueChars: new Set(text).size,
-      hasUppercase: /[A-Z]/.test(text),
-      hasLowercase: /[a-z]/.test(text),
-      hasNumbers: /[0-9]/.test(text),
-      hasSpecialChars: /[^a-zA-Z0-9\s]/.test(text),
-      hasWhitespace: /\s/.test(text),
-      entropy: this.calculateEntropy(text),
-      letterFrequency: this.analyzeLetterFrequency(text),
-      characterDistribution: this.analyzeCharacterDistribution(text)
-    };
   }
   
   private static isBase64(text: string): boolean {
@@ -141,11 +143,32 @@ export class EnhancedAlgorithmPrediction {
   
   private static isBinary(text: string): boolean {
     const binaryRegex = /^[01\s]+$/;
-    return binaryRegex.test(text) && text.replace(/\s/g, '').length % 8 === 0;
+    const cleanText = text.replace(/\s/g, '');
+    return binaryRegex.test(text) && cleanText.length % 8 === 0 && cleanText.length > 0;
   }
   
   private static isUrlEncoded(text: string): boolean {
     return /%[0-9A-Fa-f]{2}/.test(text);
+  }
+  
+  private static isBase32(text: string): boolean {
+    const base32Regex = /^[A-Z2-7]+=*$/;
+    return base32Regex.test(text) && text.length % 8 === 0;
+  }
+  
+  private static isBase58(text: string): boolean {
+    const base58Regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
+    return base58Regex.test(text) && text.length > 0;
+  }
+  
+  private static isASCII(text: string): boolean {
+    if (!/^\d+(\s+\d+)*$/.test(text)) return false;
+    const numbers = text.split(/\s+/).map(n => parseInt(n));
+    return numbers.every(n => n >= 32 && n <= 126) && numbers.length > 1;
+  }
+  
+  private static isHTMLEncoded(text: string): boolean {
+    return /&[a-zA-Z]+;|&#\d+;/.test(text);
   }
   
   private static isSymmetricEncrypted(text: string): boolean {
@@ -158,174 +181,107 @@ export class EnhancedAlgorithmPrediction {
            (text.length > 100 && /^[A-Za-z0-9+/=]+$/.test(text));
   }
   
-  private static predictClassicalCiphers(text: string, analysis: any): AlgorithmPrediction[] {
+  private static detectHashAlgorithm(text: string): AlgorithmPrediction | null {
+    if (!/^[a-f0-9]+$/i.test(text)) return null;
+    
+    const hashLengths: { [key: number]: { algorithm: string; confidence: number } } = {
+      32: { algorithm: 'MD5', confidence: 0.9 },
+      40: { algorithm: 'SHA-1', confidence: 0.9 },
+      56: { algorithm: 'SHA-224', confidence: 0.9 },
+      64: { algorithm: 'SHA-256', confidence: 0.9 },
+      96: { algorithm: 'SHA-384', confidence: 0.9 },
+      128: { algorithm: 'SHA-512', confidence: 0.9 }
+    };
+    
+    const match = hashLengths[text.length];
+    if (match) {
+      return {
+        algorithm: match.algorithm,
+        confidence: match.confidence,
+        reasoning: `${text.length} hexadecimal characters match ${match.algorithm} hash length`
+      };
+    }
+    
+    return null;
+  }
+  
+  private static predictClassicalCiphers(text: string): AlgorithmPrediction[] {
     const predictions: AlgorithmPrediction[] = [];
     
     // Caesar cipher detection
-    if (/^[A-Za-z\s]+$/.test(text) && analysis.letterFrequency.variance > 0.02) {
-      predictions.push({
-        algorithm: 'Caesar Cipher',
-        confidence: 0.6,
-        reasoning: 'Text contains only letters with unusual frequency distribution'
-      });
+    if (/^[A-Za-z\s]+$/.test(text)) {
+      const analysis = this.analyzeLetterFrequency(text);
+      if (analysis.variance > 0.02) {
+        predictions.push({
+          algorithm: 'Caesar Cipher',
+          confidence: 0.6,
+          reasoning: 'Text contains only letters with unusual frequency distribution suggesting substitution'
+        });
+      }
     }
     
     // Vigenère cipher detection
-    if (/^[A-Za-z]+$/.test(text) && analysis.entropy > 3.5 && analysis.entropy < 4.5) {
-      predictions.push({
-        algorithm: 'Vigenère Cipher',
-        confidence: 0.55,
-        reasoning: 'Moderate entropy suggests polyalphabetic substitution'
-      });
+    if (/^[A-Za-z]+$/.test(text)) {
+      const entropy = this.calculateEntropy(text);
+      if (entropy > 3.5 && entropy < 4.5) {
+        predictions.push({
+          algorithm: 'Vigenère Cipher',
+          confidence: 0.55,
+          reasoning: 'Moderate entropy suggests polyalphabetic substitution cipher'
+        });
+      }
     }
     
     // XOR cipher detection
-    if (text.includes('\x00') || /[\x01-\x1F]/.test(text)) {
+    if (/[\x00-\x1F\x7F-\xFF]/.test(text)) {
       predictions.push({
         algorithm: 'XOR Cipher',
         confidence: 0.7,
-        reasoning: 'Contains control characters typical of XOR operations'
+        reasoning: 'Contains control characters or high-bit characters typical of XOR operations'
       });
     }
     
-    // ROT13 detection
+    // ROT13 detection (test if ROT13 produces readable text)
     if (/^[A-Za-z\s]+$/.test(text)) {
-      const rot13Test = text.replace(/[a-zA-Z]/g, (char) => {
+      const rot13Result = text.replace(/[a-zA-Z]/g, (char) => {
         const start = char <= 'Z' ? 65 : 97;
         return String.fromCharCode(((char.charCodeAt(0) - start + 13) % 26) + start);
       });
       
-      if (this.isReadableText(rot13Test)) {
+      if (this.isReadableText(rot13Result)) {
         predictions.push({
           algorithm: 'ROT13',
           confidence: 0.8,
-          reasoning: 'ROT13 decryption produces readable text'
+          reasoning: 'ROT13 transformation produces readable English text'
         });
       }
     }
     
     // Atbash detection
     if (/^[A-Za-z\s]+$/.test(text)) {
-      predictions.push({
-        algorithm: 'Atbash Cipher',
-        confidence: 0.4,
-        reasoning: 'Text pattern suggests possible Atbash substitution'
+      const atbashResult = text.replace(/[a-zA-Z]/g, (char) => {
+        if (char >= 'A' && char <= 'Z') {
+          return String.fromCharCode(90 - (char.charCodeAt(0) - 65));
+        } else {
+          return String.fromCharCode(122 - (char.charCodeAt(0) - 97));
+        }
       });
-    }
-    
-    return predictions;
-  }
-  
-  private static predictHashAlgorithms(text: string): AlgorithmPrediction[] {
-    const predictions: AlgorithmPrediction[] = [];
-    
-    if (/^[a-f0-9]+$/i.test(text)) {
-      switch (text.length) {
-        case 32:
-          predictions.push({
-            algorithm: 'MD5',
-            confidence: 0.9,
-            reasoning: '32 hexadecimal characters match MD5 hash length'
-          });
-          break;
-        case 40:
-          predictions.push({
-            algorithm: 'SHA-1',
-            confidence: 0.9,
-            reasoning: '40 hexadecimal characters match SHA-1 hash length'
-          });
-          break;
-        case 56:
-          predictions.push({
-            algorithm: 'SHA-224',
-            confidence: 0.9,
-            reasoning: '56 hexadecimal characters match SHA-224 hash length'
-          });
-          break;
-        case 64:
-          predictions.push({
-            algorithm: 'SHA-256',
-            confidence: 0.9,
-            reasoning: '64 hexadecimal characters match SHA-256 hash length'
-          });
-          break;
-        case 96:
-          predictions.push({
-            algorithm: 'SHA-384',
-            confidence: 0.9,
-            reasoning: '96 hexadecimal characters match SHA-384 hash length'
-          });
-          break;
-        case 128:
-          predictions.push({
-            algorithm: 'SHA-512',
-            confidence: 0.9,
-            reasoning: '128 hexadecimal characters match SHA-512 hash length'
-          });
-          break;
-      }
-    }
-    
-    // bcrypt detection
-    if (/^\$2[aby]?\$\d{2}\$/.test(text)) {
-      predictions.push({
-        algorithm: 'bcrypt',
-        confidence: 0.95,
-        reasoning: 'Matches bcrypt hash format with salt and rounds'
-      });
-    }
-    
-    // PBKDF2 detection
-    if (text.includes('pbkdf2') || /^[A-Za-z0-9+/=]{40,}$/.test(text)) {
-      predictions.push({
-        algorithm: 'PBKDF2',
-        confidence: 0.6,
-        reasoning: 'Format suggests PBKDF2 key derivation'
-      });
-    }
-    
-    return predictions;
-  }
-  
-  private static predictEncodingAlgorithms(text: string): AlgorithmPrediction[] {
-    const predictions: AlgorithmPrediction[] = [];
-    
-    // Base32 detection
-    if (/^[A-Z2-7]+=*$/i.test(text) && text.length % 8 === 0) {
-      predictions.push({
-        algorithm: 'Base32',
-        confidence: 0.85,
-        reasoning: 'Matches Base32 character set and padding'
-      });
-    }
-    
-    // Base58 detection
-    if (/^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/.test(text)) {
-      predictions.push({
-        algorithm: 'Base58',
-        confidence: 0.7,
-        reasoning: 'Matches Base58 character set (no 0, O, I, l)'
-      });
-    }
-    
-    // ASCII detection
-    if (/^\d+(\s+\d+)*$/.test(text)) {
-      const numbers = text.split(/\s+/).map(n => parseInt(n));
-      if (numbers.every(n => n >= 32 && n <= 126)) {
+      
+      if (this.isReadableText(atbashResult)) {
         predictions.push({
-          algorithm: 'ASCII',
-          confidence: 0.8,
-          reasoning: 'Space-separated numbers in printable ASCII range'
+          algorithm: 'Atbash Cipher',
+          confidence: 0.7,
+          reasoning: 'Atbash transformation produces readable text'
         });
       }
     }
     
-    // HTML entity detection
-    if (/&[a-zA-Z]+;|&#\d+;/.test(text)) {
+    // Rail Fence detection (look for patterns)
+    if (/^[A-Za-z]+$/.test(text) && text.length > 10) {
       predictions.push({
-        algorithm: 'HTML Entities',
-        confidence: 0.9,
-        reasoning: 'Contains HTML entity references'
+        algorithm: 'Rail Fence Cipher',
+        confidence: 0.4,
+        reasoning: 'Text pattern suggests possible transposition cipher'
       });
     }
     
@@ -367,17 +323,6 @@ export class EnhancedAlgorithmPrediction {
     return { variance };
   }
   
-  private static analyzeCharacterDistribution(text: string) {
-    const distribution = {
-      letters: (text.match(/[a-zA-Z]/g) || []).length,
-      numbers: (text.match(/[0-9]/g) || []).length,
-      symbols: (text.match(/[^a-zA-Z0-9\s]/g) || []).length,
-      whitespace: (text.match(/\s/g) || []).length
-    };
-    
-    return distribution;
-  }
-  
   private static isReadableText(text: string): boolean {
     const words = text.toLowerCase().split(/\s+/).filter(word => word.length > 0);
     if (words.length === 0) return false;
@@ -385,11 +330,60 @@ export class EnhancedAlgorithmPrediction {
     const commonWords = new Set([
       'the', 'and', 'of', 'to', 'a', 'in', 'is', 'it', 'you', 'that',
       'he', 'was', 'for', 'on', 'are', 'as', 'with', 'his', 'they', 'at',
-      'be', 'this', 'have', 'from', 'or', 'one', 'had', 'by', 'word', 'but'
+      'be', 'this', 'have', 'from', 'or', 'one', 'had', 'by', 'word', 'but',
+      'not', 'what', 'all', 'were', 'we', 'when', 'your', 'can', 'said',
+      'there', 'each', 'which', 'she', 'do', 'how', 'their', 'if', 'will',
+      'up', 'other', 'about', 'out', 'many', 'then', 'them', 'these', 'so',
+      'some', 'her', 'would', 'make', 'like', 'into', 'him', 'has', 'two',
+      'more', 'very', 'what', 'know', 'just', 'first', 'get', 'over', 'think',
+      'also', 'its', 'our', 'work', 'life', 'only', 'new', 'years', 'way',
+      'may', 'say', 'come', 'could', 'now', 'than', 'my', 'well', 'people',
+      'hello', 'world', 'test', 'message', 'secret', 'password', 'admin',
+      'user', 'data', 'information', 'text', 'content', 'example', 'sample'
     ]);
     
     const commonWordCount = words.filter(word => commonWords.has(word)).length;
     return (commonWordCount / words.length) > 0.1;
+  }
+  
+  // Create training data for ML system
+  static createTrainingData(
+    inputText: string, 
+    predictedAlgorithm: string, 
+    actualAlgorithm: string, 
+    confidence: number,
+    userFeedback: 'correct' | 'incorrect'
+  ): void {
+    try {
+      const features = MLTrainingSystem.extractFeatures(inputText);
+      const isCorrect = userFeedback === 'correct';
+      
+      MLTrainingSystem.trainModel({
+        input_text: inputText,
+        predicted_algorithm: predictedAlgorithm,
+        actual_algorithm: actualAlgorithm,
+        confidence,
+        features,
+        is_correct: isCorrect,
+        user_feedback: userFeedback
+      });
+    } catch (error) {
+      console.error('Failed to create training data:', error);
+    }
+  }
+  
+  // Get ML model statistics
+  static getMLStats() {
+    try {
+      return MLTrainingSystem.getModelStats();
+    } catch (error) {
+      return {
+        training_count: 0,
+        accuracy: 0,
+        algorithms_learned: [],
+        last_updated: new Date()
+      };
+    }
   }
 }
 

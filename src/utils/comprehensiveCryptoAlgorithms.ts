@@ -107,7 +107,7 @@ export function bruteForceDecryptWithProgress(
 
 // Enhanced algorithm prediction
 export function predictAlgorithm(text: string): AlgorithmPrediction[] {
-  return predictAlgorithmEnhanced(text);
+  return EnhancedAlgorithmPrediction.predictAlgorithm(text);
 }
 
 // Get all available algorithms by category

@@ -5,7 +5,7 @@ import { Button } from '../../components/UI/Button';
 import { Textarea } from '../../components/UI/Textarea';
 import { FeedbackButton } from '../../components/UI/FeedbackButton';
 import { Header } from '../../components/Layout/Header';
-import { predictAlgorithmEnhanced, EnhancedAlgorithmPrediction } from '../../utils/enhancedAlgorithmPrediction';
+import { EnhancedAlgorithmPrediction } from '../../utils/enhancedAlgorithmPrediction';
 import { AlgorithmPrediction } from '../../types/crypto';
 
 export function AlgorithmPredictionPage() {
@@ -22,7 +22,7 @@ export function AlgorithmPredictionPage() {
     // Simulate analysis delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const results = predictAlgorithmEnhanced(inputText);
+    const results = EnhancedAlgorithmPrediction.predictAlgorithm(inputText);
     setPredictions(results);
     setIsAnalyzing(false);
   };

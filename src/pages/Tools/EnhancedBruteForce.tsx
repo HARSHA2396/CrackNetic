@@ -305,29 +305,51 @@ export function EnhancedBruteForce() {
               )}
 
               {/* Results List */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
                 {/* High Confidence Results */}
-                {filteredResults.filter(r => r.confidence >= 0.7).length > 0 && (
+                {filteredResults.filter(r => r.confidence >= 0.6).length > 0 && (
                   <Card>
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                       <CheckCircle className="h-5 w-5 mr-2 text-green-400" />
-                      High Confidence Results ({filteredResults.filter(r => r.confidence >= 0.7).length})
+                      High Confidence Results ({filteredResults.filter(r => r.confidence >= 0.6).length})
                     </h3>
 
                     <div className="space-y-3 max-h-96 overflow-y-auto">
                       {filteredResults
-                        .filter(r => r.confidence >= 0.7)
+                        .filter(r => r.confidence >= 0.6)
                         .slice(0, 10)
                         .map((result, index) => (
-                          <div key={index} className="bg-green-600/20 border border-green-600/30 rounded-lg p-4">
+                          <div key={index} className={`rounded-lg p-4 border ${
+                            result.confidence >= 0.8 ? 'bg-green-600/20 border-green-600/30' :
+                            result.confidence >= 0.6 ? 'bg-yellow-600/20 border-yellow-600/30' :
+                            'bg-blue-600/20 border-blue-600/30'
+                          }`}>
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-green-400">
+                              <span className={`text-sm font-medium ${
+                                result.confidence >= 0.8 ? 'text-green-400' :
+                                result.confidence >= 0.6 ? 'text-yellow-400' :
+                                'text-blue-400'
+                              }`}>
                                 {result.algorithm}
                               </span>
                               <div className="flex items-center space-x-2">
-                                <span className="text-xs text-green-300">
+                                <span className={`text-xs font-bold ${
+                                  result.confidence >= 0.8 ? 'text-green-300' :
+                                  result.confidence >= 0.6 ? 'text-yellow-300' :
+                                  'text-blue-300'
+                                }`}>
                                   {Math.round(result.confidence * 100)}%
                                 </span>
+                                <div className="w-16 bg-gray-600 rounded-full h-2">
+                                  <div
+                                    className={`h-2 rounded-full ${
+                                      result.confidence >= 0.8 ? 'bg-green-400' :
+                                      result.confidence >= 0.6 ? 'bg-yellow-400' :
+                                      'bg-blue-400'
+                                    }`}
+                                    style={{ width: `${result.confidence * 100}%` }}
+                                  />
+                                </div>
                                 <Button
                                   onClick={() => handleCopy(result.result)}
                                   size="sm"
@@ -338,11 +360,15 @@ export function EnhancedBruteForce() {
                                 </Button>
                               </div>
                             </div>
-                            <pre className="font-mono text-sm text-white whitespace-pre-wrap break-all">
-                              {result.result.length > 200 
-                                ? result.result.substring(0, 200) + '...' 
-                                : result.result}
+                            <pre className="font-mono text-sm text-white whitespace-pre-wrap break-all bg-gray-800 rounded p-2">
+                              {result.result}
                             </pre>
+                            {result.result.includes('harsha') || result.result.includes('hello') || result.result.includes('world') ? (
+                              <div className="mt-2 text-xs text-green-400 flex items-center">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Contains recognizable words/names
+                              </div>
+                            ) : null}
                           </div>
                         ))}
                     </div>
@@ -352,8 +378,8 @@ export function EnhancedBruteForce() {
                 {/* All Filtered Results */}
                 <Card>
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <AlertTriangle className="h-5 w-5 mr-2 text-yellow-400" />
-                    All Results ({filteredResults.length})
+                    <TrendingUp className="h-5 w-5 mr-2 text-purple-400" />
+                    All Results Ranked by Confidence ({filteredResults.length})
                   </h3>
 
                   <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -363,25 +389,42 @@ export function EnhancedBruteForce() {
                         className={`rounded-lg p-3 ${
                           result.algorithm.includes('provided key')
                             ? 'bg-blue-600/20 border border-blue-600/30'
-                            : result.confidence >= 0.7 
+                            : result.confidence >= 0.8 
                             ? 'bg-green-600/20 border border-green-600/30' 
-                            : result.confidence >= 0.5
+                            : result.confidence >= 0.6
                             ? 'bg-yellow-600/20 border border-yellow-600/30'
+                            : result.confidence >= 0.4
+                            ? 'bg-orange-600/20 border-orange-600/30'
                             : 'bg-gray-700'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className={`text-sm font-medium ${
                             result.algorithm.includes('provided key') ? 'text-blue-400' :
-                            result.confidence >= 0.7 ? 'text-green-400' :
-                            result.confidence >= 0.5 ? 'text-yellow-400' : 'text-gray-400'
+                            result.confidence >= 0.8 ? 'text-green-400' :
+                            result.confidence >= 0.6 ? 'text-yellow-400' :
+                            result.confidence >= 0.4 ? 'text-orange-400' : 'text-gray-400'
                           }`}>
                             {result.algorithm}
                           </span>
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs text-gray-400">
+                            <span className={`text-xs font-bold ${
+                              result.confidence >= 0.8 ? 'text-green-300' :
+                              result.confidence >= 0.6 ? 'text-yellow-300' :
+                              result.confidence >= 0.4 ? 'text-orange-300' : 'text-gray-400'
+                            }`}>
                               {Math.round(result.confidence * 100)}%
                             </span>
+                            <div className="w-12 bg-gray-600 rounded-full h-1.5">
+                              <div
+                                className={`h-1.5 rounded-full ${
+                                  result.confidence >= 0.8 ? 'bg-green-400' :
+                                  result.confidence >= 0.6 ? 'bg-yellow-400' :
+                                  result.confidence >= 0.4 ? 'bg-orange-400' : 'bg-gray-400'
+                                }`}
+                                style={{ width: `${result.confidence * 100}%` }}
+                              />
+                            </div>
                             <Button
                               onClick={() => handleCopy(result.result)}
                               size="sm"
@@ -391,8 +434,31 @@ export function EnhancedBruteForce() {
                             </Button>
                           </div>
                         </div>
-                        <div className="text-xs font-mono text-gray-300 truncate">
+                        <div className="text-xs font-mono text-gray-300 truncate bg-gray-800 rounded px-2 py-1">
                           {result.result}
+                        </div>
+                        {/* Quality indicators */}
+                        <div className="flex items-center space-x-2 mt-1">
+                          {result.result.toLowerCase().includes('harsha') && (
+                            <span className="text-xs bg-green-600/30 text-green-300 px-2 py-0.5 rounded">
+                              Contains "harsha"
+                            </span>
+                          )}
+                          {result.result.toLowerCase().includes('hello') && (
+                            <span className="text-xs bg-green-600/30 text-green-300 px-2 py-0.5 rounded">
+                              Contains "hello"
+                            </span>
+                          )}
+                          {/\b[A-Z][a-z]+\b/.test(result.result) && (
+                            <span className="text-xs bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded">
+                              Proper names
+                            </span>
+                          )}
+                          {/[.!?]/.test(result.result) && (
+                            <span className="text-xs bg-purple-600/30 text-purple-300 px-2 py-0.5 rounded">
+                              Sentences
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}
