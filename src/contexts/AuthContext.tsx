@@ -73,6 +73,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     
     try {
+      // Mock authentication if Supabase is not configured
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        // Create mock user for development
+        const mockUser: User = {
+          id: 'mock-user-id',
+          email: email,
+          username: email.split('@')[0] || 'User',
+          createdAt: new Date()
+        };
+        setUser(mockUser);
+        return true;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -101,6 +114,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     
     try {
+      // Mock registration if Supabase is not configured
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        // Create mock user for development
+        const mockUser: User = {
+          id: 'mock-user-id',
+          email: email,
+          username: username,
+          createdAt: new Date()
+        };
+        setUser(mockUser);
+        return true;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -131,6 +157,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = async () => {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      setUser(null);
+      return;
+    }
+    
     await supabase.auth.signOut();
     setUser(null);
   };

@@ -1,13 +1,36 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+// Create a mock client if environment variables are missing
+let supabase: any;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  console.warn('Supabase environment variables not configured. Using mock client.');
+  
+  // Create mock Supabase client for development
+  supabase = {
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+      signInWithPassword: () => Promise.resolve({ data: { user: null }, error: { message: 'Supabase not configured' } }),
+      signUp: () => Promise.resolve({ data: { user: null }, error: { message: 'Supabase not configured' } }),
+      signOut: () => Promise.resolve({ error: null }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+    },
+    from: () => ({
+      select: () => ({ eq: () => ({ order: () => ({ limit: () => Promise.resolve({ data: [], error: null }) }) }) }),
+      insert: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }) }) }),
+      delete: () => ({ eq: () => Promise.resolve({ error: { message: 'Supabase not configured' } }) }),
+      upsert: () => ({ select: () => Promise.resolve({ data: [], error: { message: 'Supabase not configured' } }) })
+    })
+  };
+} else {
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export { supabase };
 
 // Database types
 export interface UserKey {
@@ -78,6 +101,10 @@ export interface MLModelStats {
 // Key management functions
 export const keyService = {
   async saveKey(key: Omit<UserKey, 'id' | 'user_id' | 'created_at'>) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      throw new Error('Supabase not configured. Please set up your Supabase project.');
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -95,6 +122,10 @@ export const keyService = {
   },
 
   async getUserKeys() {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return [];
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -109,6 +140,10 @@ export const keyService = {
   },
 
   async deleteKey(keyId: string) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return;
+    }
+
     const { error } = await supabase
       .from('user_keys')
       .delete()
@@ -121,6 +156,10 @@ export const keyService = {
 // Encryption history functions
 export const encryptionService = {
   async saveEncryption(encryption: Omit<EncryptionHistory, 'id' | 'user_id' | 'created_at'>) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      throw new Error('Supabase not configured. Please set up your Supabase project.');
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -138,6 +177,10 @@ export const encryptionService = {
   },
 
   async getEncryptionHistory(limit = 50) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return [];
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -159,6 +202,10 @@ export const encryptionService = {
   },
 
   async deleteEncryption(encryptionId: string) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return;
+    }
+
     const { error } = await supabase
       .from('encryption_history')
       .delete()
@@ -171,6 +218,10 @@ export const encryptionService = {
 // Steganography history functions
 export const steganographyService = {
   async saveSteganography(stego: Omit<SteganographyHistory, 'id' | 'user_id' | 'created_at'>) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      throw new Error('Supabase not configured. Please set up your Supabase project.');
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -188,6 +239,10 @@ export const steganographyService = {
   },
 
   async getSteganographyHistory(limit = 50) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return [];
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -203,6 +258,10 @@ export const steganographyService = {
   },
 
   async deleteSteganography(stegoId: string) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return;
+    }
+
     const { error } = await supabase
       .from('steganography_history')
       .delete()
@@ -215,6 +274,10 @@ export const steganographyService = {
 // ML training functions
 export const mlService = {
   async saveTrainingData(training: Omit<MLTrainingData, 'id' | 'user_id' | 'created_at'>) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      throw new Error('Supabase not configured. Please set up your Supabase project.');
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -232,6 +295,10 @@ export const mlService = {
   },
 
   async getTrainingData(limit = 1000) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return [];
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -247,6 +314,10 @@ export const mlService = {
   },
 
   async saveModelWeights(weights: Omit<MLModelWeights, 'id' | 'user_id' | 'updated_at'>[]) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      throw new Error('Supabase not configured. Please set up your Supabase project.');
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -268,6 +339,10 @@ export const mlService = {
   },
 
   async getModelWeights() {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return [];
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -281,6 +356,10 @@ export const mlService = {
   },
 
   async saveModelStats(stats: Omit<MLModelStats, 'id' | 'user_id' | 'last_updated'>) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      throw new Error('Supabase not configured. Please set up your Supabase project.');
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -302,6 +381,10 @@ export const mlService = {
   },
 
   async getModelStats() {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return null;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
