@@ -47,22 +47,22 @@ export function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary-600/20 rounded-full">
-              <UserPlus className="h-8 w-8 text-primary-400" />
+            <div className="p-4 bg-gradient-to-br from-primary-500/20 to-primary-600/20 rounded-2xl backdrop-blur-sm border border-white/10">
+              <UserPlus className="h-10 w-10 text-primary-400" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-          <p className="text-gray-400">Join SecureCrypt to access all features</p>
+          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">Join Cracknetic</h1>
+          <p className="text-gray-400 text-lg">Create account to access all professional features</p>
         </div>
 
-        <Card>
+        <Card variant="glass">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-4 bg-red-600/20 border border-red-600/30 rounded-lg">
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                 <p className="text-red-400 text-sm">{error}</p>
               </div>
             )}
@@ -73,6 +73,7 @@ export function Register() {
               value={email}
               onChange={setEmail}
               placeholder="Enter your email"
+              icon={Mail}
               required
             />
 
@@ -82,6 +83,7 @@ export function Register() {
               value={username}
               onChange={setUsername}
               placeholder="Choose a username"
+              icon={User}
               required
             />
 
@@ -91,6 +93,7 @@ export function Register() {
               value={password}
               onChange={setPassword}
               placeholder="Create a password"
+              icon={Lock}
               required
             />
 
@@ -100,6 +103,7 @@ export function Register() {
               value={confirmPassword}
               onChange={setConfirmPassword}
               placeholder="Confirm your password"
+              icon={Lock}
               required
             />
 

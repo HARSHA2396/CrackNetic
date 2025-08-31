@@ -27,16 +27,16 @@ export function Button({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variantClasses = {
-    primary: 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 text-white',
-    secondary: 'bg-gray-600 hover:bg-gray-700 focus:ring-gray-500 text-white',
-    accent: 'bg-accent-600 hover:bg-accent-700 focus:ring-accent-500 text-white',
-    danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white',
+    primary: 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:ring-primary-500 text-white shadow-lg hover:shadow-xl',
+    secondary: 'bg-white/10 hover:bg-white/20 focus:ring-white/20 text-white border border-white/20 backdrop-blur-sm',
+    accent: 'bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 focus:ring-accent-500 text-white shadow-lg hover:shadow-xl',
+    danger: 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 focus:ring-red-500 text-white shadow-lg hover:shadow-xl',
   };
   
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-2.5 text-sm',
+    lg: 'px-8 py-3 text-base',
   };
   
   return (

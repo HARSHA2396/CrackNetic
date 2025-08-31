@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, AlertTriangle, CheckCircle, Copy, Filter, Settings, Key } from 'lucide-react';
+import { Zap, AlertTriangle, CheckCircle, Copy, Filter, Settings, Key, Target, TrendingUp, Award, Sparkles } from 'lucide-react';
 import { Card } from '../../components/UI/Card';
 import { Button } from '../../components/UI/Button';
 import { Input } from '../../components/UI/Input';
@@ -11,11 +11,11 @@ import { bruteForceDecryptWithProgress } from '../../utils/comprehensiveCryptoAl
 import { BruteForceResult } from '../../types/crypto';
 
 const categoryOptions = [
-  { value: 'all', label: 'All Algorithms' },
-  { value: 'encoding', label: 'Encoding Only' },
-  { value: 'classical', label: 'Classical Ciphers Only' },
-  { value: 'asymmetric', label: 'Asymmetric Encryption Only' },
-  { value: 'symmetric', label: 'Symmetric Encryption Only' }
+  { value: 'all', label: '🔍 All Algorithms (Comprehensive)' },
+  { value: 'encoding', label: '📝 Encoding Only (Fast)' },
+  { value: 'classical', label: '🏛️ Classical Ciphers Only' },
+  { value: 'symmetric', label: '🔐 Symmetric Encryption Only' },
+  { value: 'asymmetric', label: '🔑 Asymmetric Encryption Only' }
 ];
 
 export function EnhancedBruteForce() {
@@ -29,7 +29,7 @@ export function EnhancedBruteForce() {
   const [minConfidence, setMinConfidence] = useState(0.3);
 
   const handleBruteForce = async () => {
-    if (!inputText) return;
+    if (!inputText.trim()) return;
 
     setIsProcessing(true);
     setProgress(0);
@@ -65,26 +65,44 @@ export function EnhancedBruteForce() {
   const providedKeyResults = results.filter(r => r.algorithm.includes('provided key'));
   const totalAttempts = results.length;
 
+  // Categorize results by confidence
+  const excellentResults = filteredResults.filter(r => r.confidence >= 0.8);
+  const goodResults = filteredResults.filter(r => r.confidence >= 0.6 && r.confidence < 0.8);
+  const fairResults = filteredResults.filter(r => r.confidence >= 0.4 && r.confidence < 0.6);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
       <Header />
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-4">Enhanced Brute Force Decryption</h1>
-            <p className="text-gray-400 text-lg">
-              Advanced brute force analysis with key support and categorized algorithm testing
+          {/* Hero Section */}
+          <div className="text-center mb-8 lg:mb-12">
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div className="p-4 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-2xl backdrop-blur-sm border border-white/10">
+                  <Zap className="h-12 w-12 text-yellow-400" />
+                </div>
+                <div className="absolute -top-2 -right-2">
+                  <Sparkles className="h-6 w-6 text-accent-400 animate-bounce-subtle" />
+                </div>
+              </div>
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+              Enhanced Brute Force
+            </h1>
+            <p className="text-gray-400 text-lg lg:text-xl max-w-3xl mx-auto">
+              Advanced brute force analysis with percentage-based ranking and intelligent readability scoring
             </p>
           </div>
 
           {/* Configuration Section */}
-          <Card className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-              <Settings className="h-5 w-5 mr-2 text-yellow-400" />
+          <Card variant="gradient" className="mb-8">
+            <h2 className="text-xl lg:text-2xl font-semibold text-white mb-6 flex items-center">
+              <Settings className="h-6 w-6 mr-3 text-yellow-400" />
               Configuration
             </h2>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
               <div className="space-y-6">
                 <Select
                   label="Algorithm Category"
@@ -97,7 +115,7 @@ export function EnhancedBruteForce() {
                   label="Provided Key (Optional)"
                   value={providedKey}
                   onChange={setProvidedKey}
-                  placeholder="Enter a key to try (will be tested first)"
+                  placeholder="Enter a key to prioritize in testing"
                   icon={Key}
                 />
 
@@ -105,91 +123,104 @@ export function EnhancedBruteForce() {
                   label="Encrypted Text"
                   value={inputText}
                   onChange={setInputText}
-                  placeholder="Paste your encrypted text here..."
+                  placeholder="Paste your encrypted text here for analysis..."
                   rows={6}
                 />
 
                 <Button
                   onClick={handleBruteForce}
                   loading={isProcessing}
-                  disabled={!inputText}
+                  disabled={!inputText.trim()}
                   size="lg"
                   icon={Zap}
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
                 >
-                  Start Enhanced Brute Force
+                  {isProcessing ? 'Analyzing...' : 'Start Enhanced Analysis'}
                 </Button>
               </div>
 
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-300 mb-3">Category Information</h3>
-                  <div className="bg-gray-700 rounded-lg p-4 text-sm text-gray-300">
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                  <h3 className="text-sm font-medium text-white mb-3 flex items-center">
+                    <Info className="h-4 w-4 mr-2" />
+                    Category Information
+                  </h3>
+                  <div className="text-sm text-gray-300 space-y-2">
                     {category === 'all' && (
-                      <ul className="space-y-1">
-                        <li>• Tests all available algorithms</li>
-                        <li>• Includes 100+ different methods</li>
-                        <li>• Most comprehensive analysis</li>
-                        <li>• Takes longer to complete</li>
-                        {providedKey && <li>• <strong>Will test your provided key first</strong></li>}
-                      </ul>
+                      <div>
+                        <div className="font-medium text-primary-400 mb-1">Comprehensive Analysis</div>
+                        <ul className="space-y-1 text-gray-400">
+                          <li>• Tests all 84+ available algorithms</li>
+                          <li>• Most thorough analysis possible</li>
+                          <li>• Takes longer but covers everything</li>
+                          {providedKey && <li>• <strong className="text-blue-400">Your key tested first</strong></li>}
+                        </ul>
+                      </div>
                     )}
                     {category === 'encoding' && (
-                      <ul className="space-y-1">
-                        <li>• Base64, Base32, Base58, etc.</li>
-                        <li>• Hexadecimal and Binary</li>
-                        <li>• URL and HTML encoding</li>
-                        <li>• Fastest category to test</li>
-                        <li>• No keys required for these algorithms</li>
-                      </ul>
+                      <div>
+                        <div className="font-medium text-green-400 mb-1">Encoding Analysis</div>
+                        <ul className="space-y-1 text-gray-400">
+                          <li>• Base64, Base32, Base58, Hex, Binary</li>
+                          <li>• URL and HTML encoding</li>
+                          <li>• Fastest category to test</li>
+                          <li>• No keys required</li>
+                        </ul>
+                      </div>
                     )}
                     {category === 'classical' && (
-                      <ul className="space-y-1">
-                        <li>• Substitution: Caesar, Atbash, ROT13, Monoalphabetic</li>
-                        <li>• Polyalphabetic: Vigenère, Beaufort, Autokey, Playfair, Hill</li>
-                        <li>• Transposition: Rail Fence, Columnar, Scytale, Route</li>
-                        <li>• Tests common keys and shifts</li>
-                        {providedKey && <li>• <strong>Will prioritize your provided key</strong></li>}
-                      </ul>
-                    )}
-                    {category === 'asymmetric' && (
-                      <ul className="space-y-1">
-                        <li>• RSA, ElGamal, ECC encryption</li>
-                        <li>• Post-quantum: Kyber, Dilithium, NTRU</li>
-                        <li>• Knapsack and Paillier cryptosystems</li>
-                        <li>• Tests common keys and shifts</li>
-                        {providedKey && <li>• <strong>Will prioritize your provided key</strong></li>}
-                      </ul>
+                      <div>
+                        <div className="font-medium text-purple-400 mb-1">Classical Ciphers</div>
+                        <ul className="space-y-1 text-gray-400">
+                          <li>• Caesar, Vigenère, Playfair, Hill</li>
+                          <li>• Rail Fence, Columnar, Route</li>
+                          <li>• Tests common keys and shifts</li>
+                          {providedKey && <li>• <strong className="text-blue-400">Prioritizes your key</strong></li>}
+                        </ul>
+                      </div>
                     )}
                     {category === 'symmetric' && (
-                      <ul className="space-y-1">
-                        <li>• Block ciphers: AES, DES, 3DES, Blowfish, Twofish, IDEA</li>
-                        <li>• Stream ciphers: RC4, ChaCha20, Salsa20, A5/1, Grain</li>
-                        <li>• Various modes: ECB, CBC, CFB, OFB, CTR, GCM</li>
-                        <li>• Tests with common passwords</li>
-                        {providedKey && <li>• <strong>Will test your key with all algorithms</strong></li>}
-                      </ul>
+                      <div>
+                        <div className="font-medium text-blue-400 mb-1">Symmetric Encryption</div>
+                        <ul className="space-y-1 text-gray-400">
+                          <li>• AES, DES, Blowfish, ChaCha20</li>
+                          <li>• Various cipher modes</li>
+                          <li>• Tests common passwords</li>
+                          {providedKey && <li>• <strong className="text-blue-400">Tests your key first</strong></li>}
+                        </ul>
+                      </div>
+                    )}
+                    {category === 'asymmetric' && (
+                      <div>
+                        <div className="font-medium text-orange-400 mb-1">Asymmetric Encryption</div>
+                        <ul className="space-y-1 text-gray-400">
+                          <li>• RSA, ECC, ElGamal</li>
+                          <li>• Post-quantum algorithms</li>
+                          <li>• Public/private key testing</li>
+                          {providedKey && <li>• <strong className="text-blue-400">Uses your key</strong></li>}
+                        </ul>
+                      </div>
                     )}
                   </div>
                 </div>
 
                 {providedKey && (
-                  <div className="bg-blue-600/20 border border-blue-600/30 rounded-lg p-4">
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
                     <h3 className="text-sm font-medium text-blue-400 mb-2 flex items-center">
-                      <Key className="h-4 w-4 mr-1" />
+                      <Key className="h-4 w-4 mr-2" />
                       Key Strategy
                     </h3>
                     <p className="text-sm text-blue-300">
                       Your provided key will be tested first with all applicable algorithms. 
-                      Common keys will also be tested for comprehensive coverage.
+                      Results will be clearly marked and prioritized.
                     </p>
                   </div>
                 )}
 
                 {isProcessing && (
-                  <div>
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                     <ProgressBar progress={progress} />
-                    <p className="text-sm text-gray-400 mt-2 text-center">
+                    <p className="text-sm text-gray-400 mt-3 text-center">
                       Testing algorithms... {Math.round(progress)}% complete
                     </p>
                   </div>
@@ -202,23 +233,23 @@ export function EnhancedBruteForce() {
           {results.length > 0 && (
             <>
               {/* Results Summary */}
-              <Card className="mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-white flex items-center">
-                    <CheckCircle className="h-5 w-5 mr-2 text-green-400" />
-                    Results Summary
+              <Card variant="glass" className="mb-6">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+                  <h2 className="text-xl lg:text-2xl font-semibold text-white flex items-center mb-4 lg:mb-0">
+                    <TrendingUp className="h-6 w-6 mr-3 text-green-400" />
+                    Analysis Results
                   </h2>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="flex items-center space-x-3">
                       <Filter className="h-4 w-4 text-gray-400" />
                       <label className="flex items-center space-x-2">
                         <input
                           type="checkbox"
                           checked={showOnlyReadable}
                           onChange={(e) => setShowOnlyReadable(e.target.checked)}
-                          className="rounded"
+                          className="rounded bg-white/10 border-white/20 text-primary-500 focus:ring-primary-500"
                         />
-                        <span className="text-sm text-gray-300">Show only readable</span>
+                        <span className="text-sm text-gray-300">Readable only</span>
                       </label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -226,7 +257,7 @@ export function EnhancedBruteForce() {
                       <select
                         value={minConfidence}
                         onChange={(e) => setMinConfidence(parseFloat(e.target.value))}
-                        className="bg-gray-700 text-white text-sm rounded px-2 py-1"
+                        className="bg-white/10 text-white text-sm rounded-lg px-3 py-1 border border-white/20 focus:ring-2 focus:ring-primary-500"
                       >
                         <option value={0}>0%</option>
                         <option value={0.1}>10%</option>
@@ -238,51 +269,65 @@ export function EnhancedBruteForce() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                  <div className="bg-gray-700 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-white">{totalAttempts}</div>
-                    <div className="text-sm text-gray-400">Total Attempts</div>
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">
+                    <div className="text-2xl lg:text-3xl font-bold text-white mb-1">{totalAttempts}</div>
+                    <div className="text-sm text-gray-400">Total Tests</div>
                   </div>
-                  <div className="bg-gray-700 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-green-400">{readableResults.length}</div>
-                    <div className="text-sm text-gray-400">Readable Results</div>
+                  <div className="bg-green-500/10 backdrop-blur-sm rounded-xl p-4 text-center border border-green-500/20">
+                    <div className="text-2xl lg:text-3xl font-bold text-green-400 mb-1">{readableResults.length}</div>
+                    <div className="text-sm text-gray-400">Readable</div>
                   </div>
-                  <div className="bg-gray-700 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-blue-400">{providedKeyResults.length}</div>
-                    <div className="text-sm text-gray-400">Provided Key Hits</div>
+                  <div className="bg-blue-500/10 backdrop-blur-sm rounded-xl p-4 text-center border border-blue-500/20">
+                    <div className="text-2xl lg:text-3xl font-bold text-blue-400 mb-1">{providedKeyResults.length}</div>
+                    <div className="text-sm text-gray-400">Key Hits</div>
                   </div>
-                  <div className="bg-gray-700 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-purple-400">{filteredResults.length}</div>
-                    <div className="text-sm text-gray-400">Filtered Results</div>
+                  <div className="bg-purple-500/10 backdrop-blur-sm rounded-xl p-4 text-center border border-purple-500/20">
+                    <div className="text-2xl lg:text-3xl font-bold text-purple-400 mb-1">{filteredResults.length}</div>
+                    <div className="text-sm text-gray-400">Filtered</div>
                   </div>
-                  <div className="bg-gray-700 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-yellow-400">
+                  <div className="bg-yellow-500/10 backdrop-blur-sm rounded-xl p-4 text-center border border-yellow-500/20">
+                    <div className="text-2xl lg:text-3xl font-bold text-yellow-400 mb-1">
                       {readableResults.length > 0 ? Math.round(readableResults[0].confidence * 100) : 0}%
                     </div>
-                    <div className="text-sm text-gray-400">Best Confidence</div>
+                    <div className="text-sm text-gray-400">Best Score</div>
                   </div>
                 </div>
               </Card>
 
-              {/* Provided Key Results */}
-              {providedKey && providedKeyResults.length > 0 && (
-                <Card className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <Key className="h-5 w-5 mr-2 text-blue-400" />
-                    Provided Key Results ({providedKeyResults.length})
+              {/* Excellent Results (80%+) */}
+              {excellentResults.length > 0 && (
+                <Card variant="glass" className="mb-6">
+                  <h3 className="text-lg lg:text-xl font-semibold text-white mb-4 flex items-center">
+                    <Award className="h-5 w-5 mr-3 text-green-400" />
+                    Excellent Matches ({excellentResults.length})
+                    <span className="ml-2 bg-green-500/20 text-green-300 text-xs px-2 py-1 rounded-full">80%+ Confidence</span>
                   </h3>
 
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {providedKeyResults.slice(0, 10).map((result, index) => (
-                      <div key={index} className="bg-blue-600/20 border border-blue-600/30 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-blue-400">
-                            {result.algorithm}
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-xs text-blue-300">
-                              {Math.round(result.confidence * 100)}%
+                  <div className="space-y-4">
+                    {excellentResults.slice(0, 5).map((result, index) => (
+                      <div key={index} className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 lg:p-6">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
+                          <div className="flex items-center space-x-3 mb-2 lg:mb-0">
+                            <div className="p-2 bg-green-500/20 rounded-lg">
+                              <CheckCircle className="h-5 w-5 text-green-400" />
+                            </div>
+                            <span className="text-lg font-semibold text-green-400">
+                              {result.algorithm}
                             </span>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-xl font-bold text-green-300">
+                                {Math.round(result.confidence * 100)}%
+                              </span>
+                              <div className="w-20 bg-gray-600 rounded-full h-2.5">
+                                <div
+                                  className="h-2.5 rounded-full bg-gradient-to-r from-green-400 to-green-500 transition-all duration-500"
+                                  style={{ width: `${result.confidence * 100}%` }}
+                                />
+                              </div>
+                            </div>
                             <Button
                               onClick={() => handleCopy(result.result)}
                               size="sm"
@@ -293,135 +338,65 @@ export function EnhancedBruteForce() {
                             </Button>
                           </div>
                         </div>
-                        <pre className="font-mono text-sm text-white whitespace-pre-wrap break-all">
-                          {result.result.length > 200 
-                            ? result.result.substring(0, 200) + '...' 
-                            : result.result}
-                        </pre>
+                        
+                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                          <pre className="font-mono text-sm text-white whitespace-pre-wrap break-all">
+                            {result.result}
+                          </pre>
+                        </div>
+                        
+                        {/* Quality indicators */}
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {result.result.toLowerCase().includes('harsha') && (
+                            <span className="bg-green-500/20 text-green-300 text-xs px-3 py-1 rounded-full border border-green-500/30">
+                              ✓ Contains "harsha"
+                            </span>
+                          )}
+                          {result.result.toLowerCase().includes('hello') && (
+                            <span className="bg-green-500/20 text-green-300 text-xs px-3 py-1 rounded-full border border-green-500/30">
+                              ✓ Contains "hello"
+                            </span>
+                          )}
+                          {/\b[A-Z][a-z]+\b/.test(result.result) && (
+                            <span className="bg-blue-500/20 text-blue-300 text-xs px-3 py-1 rounded-full border border-blue-500/30">
+                              ✓ Proper names
+                            </span>
+                          )}
+                          {/[.!?]/.test(result.result) && (
+                            <span className="bg-purple-500/20 text-purple-300 text-xs px-3 py-1 rounded-full border border-purple-500/30">
+                              ✓ Sentences
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
                 </Card>
               )}
 
-              {/* Results List */}
-              <div className="space-y-6">
-                {/* High Confidence Results */}
-                {filteredResults.filter(r => r.confidence >= 0.6).length > 0 && (
-                  <Card>
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                      <CheckCircle className="h-5 w-5 mr-2 text-green-400" />
-                      High Confidence Results ({filteredResults.filter(r => r.confidence >= 0.6).length})
-                    </h3>
-
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
-                      {filteredResults
-                        .filter(r => r.confidence >= 0.6)
-                        .slice(0, 10)
-                        .map((result, index) => (
-                          <div key={index} className={`rounded-lg p-4 border ${
-                            result.confidence >= 0.8 ? 'bg-green-600/20 border-green-600/30' :
-                            result.confidence >= 0.6 ? 'bg-yellow-600/20 border-yellow-600/30' :
-                            'bg-blue-600/20 border-blue-600/30'
-                          }`}>
-                            <div className="flex items-center justify-between mb-2">
-                              <span className={`text-sm font-medium ${
-                                result.confidence >= 0.8 ? 'text-green-400' :
-                                result.confidence >= 0.6 ? 'text-yellow-400' :
-                                'text-blue-400'
-                              }`}>
-                                {result.algorithm}
-                              </span>
-                              <div className="flex items-center space-x-2">
-                                <span className={`text-xs font-bold ${
-                                  result.confidence >= 0.8 ? 'text-green-300' :
-                                  result.confidence >= 0.6 ? 'text-yellow-300' :
-                                  'text-blue-300'
-                                }`}>
-                                  {Math.round(result.confidence * 100)}%
-                                </span>
-                                <div className="w-16 bg-gray-600 rounded-full h-2">
-                                  <div
-                                    className={`h-2 rounded-full ${
-                                      result.confidence >= 0.8 ? 'bg-green-400' :
-                                      result.confidence >= 0.6 ? 'bg-yellow-400' :
-                                      'bg-blue-400'
-                                    }`}
-                                    style={{ width: `${result.confidence * 100}%` }}
-                                  />
-                                </div>
-                                <Button
-                                  onClick={() => handleCopy(result.result)}
-                                  size="sm"
-                                  variant="secondary"
-                                  icon={Copy}
-                                >
-                                  Copy
-                                </Button>
-                              </div>
-                            </div>
-                            <pre className="font-mono text-sm text-white whitespace-pre-wrap break-all bg-gray-800 rounded p-2">
-                              {result.result}
-                            </pre>
-                            {result.result.includes('harsha') || result.result.includes('hello') || result.result.includes('world') ? (
-                              <div className="mt-2 text-xs text-green-400 flex items-center">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Contains recognizable words/names
-                              </div>
-                            ) : null}
-                          </div>
-                        ))}
-                    </div>
-                  </Card>
-                )}
-
-                {/* All Filtered Results */}
-                <Card>
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <TrendingUp className="h-5 w-5 mr-2 text-purple-400" />
-                    All Results Ranked by Confidence ({filteredResults.length})
+              {/* Good Results (60-79%) */}
+              {goodResults.length > 0 && (
+                <Card variant="glass" className="mb-6">
+                  <h3 className="text-lg lg:text-xl font-semibold text-white mb-4 flex items-center">
+                    <Target className="h-5 w-5 mr-3 text-yellow-400" />
+                    Good Matches ({goodResults.length})
+                    <span className="ml-2 bg-yellow-500/20 text-yellow-300 text-xs px-2 py-1 rounded-full">60-79% Confidence</span>
                   </h3>
 
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {filteredResults.slice(0, 50).map((result, index) => (
-                      <div 
-                        key={index} 
-                        className={`rounded-lg p-3 ${
-                          result.algorithm.includes('provided key')
-                            ? 'bg-blue-600/20 border border-blue-600/30'
-                            : result.confidence >= 0.8 
-                            ? 'bg-green-600/20 border border-green-600/30' 
-                            : result.confidence >= 0.6
-                            ? 'bg-yellow-600/20 border border-yellow-600/30'
-                            : result.confidence >= 0.4
-                            ? 'bg-orange-600/20 border-orange-600/30'
-                            : 'bg-gray-700'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className={`text-sm font-medium ${
-                            result.algorithm.includes('provided key') ? 'text-blue-400' :
-                            result.confidence >= 0.8 ? 'text-green-400' :
-                            result.confidence >= 0.6 ? 'text-yellow-400' :
-                            result.confidence >= 0.4 ? 'text-orange-400' : 'text-gray-400'
-                          }`}>
+                  <div className="space-y-3">
+                    {goodResults.slice(0, 8).map((result, index) => (
+                      <div key={index} className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
+                          <span className="text-base font-medium text-yellow-400 mb-2 sm:mb-0">
                             {result.algorithm}
                           </span>
-                          <div className="flex items-center space-x-2">
-                            <span className={`text-xs font-bold ${
-                              result.confidence >= 0.8 ? 'text-green-300' :
-                              result.confidence >= 0.6 ? 'text-yellow-300' :
-                              result.confidence >= 0.4 ? 'text-orange-300' : 'text-gray-400'
-                            }`}>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-lg font-bold text-yellow-300">
                               {Math.round(result.confidence * 100)}%
                             </span>
-                            <div className="w-12 bg-gray-600 rounded-full h-1.5">
+                            <div className="w-16 bg-gray-600 rounded-full h-2">
                               <div
-                                className={`h-1.5 rounded-full ${
-                                  result.confidence >= 0.8 ? 'bg-green-400' :
-                                  result.confidence >= 0.6 ? 'bg-yellow-400' :
-                                  result.confidence >= 0.4 ? 'bg-orange-400' : 'bg-gray-400'
-                                }`}
+                                className="h-2 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-500"
                                 style={{ width: `${result.confidence * 100}%` }}
                               />
                             </div>
@@ -434,55 +409,140 @@ export function EnhancedBruteForce() {
                             </Button>
                           </div>
                         </div>
-                        <div className="text-xs font-mono text-gray-300 truncate bg-gray-800 rounded px-2 py-1">
-                          {result.result}
+                        <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                          <div className="text-sm font-mono text-gray-300 truncate">
+                            {result.result}
+                          </div>
                         </div>
-                        {/* Quality indicators */}
-                        <div className="flex items-center space-x-2 mt-1">
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* All Results Ranked */}
+              <Card variant="glass">
+                <h3 className="text-lg lg:text-xl font-semibold text-white mb-6 flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-3 text-purple-400" />
+                  All Results Ranked by Percentage ({filteredResults.length})
+                </h3>
+
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {filteredResults.slice(0, 50).map((result, index) => {
+                    const isProvidedKey = result.algorithm.includes('provided key');
+                    const confidencePercent = Math.round(result.confidence * 100);
+                    
+                    return (
+                      <div 
+                        key={index} 
+                        className={`rounded-xl p-3 lg:p-4 border transition-all duration-200 hover:bg-white/10 ${
+                          isProvidedKey
+                            ? 'bg-blue-500/10 border-blue-500/30'
+                            : confidencePercent >= 80 
+                            ? 'bg-green-500/10 border-green-500/30' 
+                            : confidencePercent >= 60
+                            ? 'bg-yellow-500/10 border-yellow-500/30'
+                            : confidencePercent >= 40
+                            ? 'bg-orange-500/10 border-orange-500/30'
+                            : 'bg-white/5 border-white/10'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                          <span className={`text-sm lg:text-base font-medium mb-1 sm:mb-0 ${
+                            isProvidedKey ? 'text-blue-400' :
+                            confidencePercent >= 80 ? 'text-green-400' :
+                            confidencePercent >= 60 ? 'text-yellow-400' :
+                            confidencePercent >= 40 ? 'text-orange-400' : 'text-gray-400'
+                          }`}>
+                            {result.algorithm}
+                          </span>
+                          <div className="flex items-center space-x-3">
+                            <span className={`text-lg font-bold ${
+                              confidencePercent >= 80 ? 'text-green-300' :
+                              confidencePercent >= 60 ? 'text-yellow-300' :
+                              confidencePercent >= 40 ? 'text-orange-300' : 'text-gray-400'
+                            }`}>
+                              {confidencePercent}%
+                            </span>
+                            <div className="w-16 lg:w-20 bg-gray-600 rounded-full h-2">
+                              <div
+                                className={`h-2 rounded-full transition-all duration-500 ${
+                                  confidencePercent >= 80 ? 'bg-gradient-to-r from-green-400 to-green-500' :
+                                  confidencePercent >= 60 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
+                                  confidencePercent >= 40 ? 'bg-gradient-to-r from-orange-400 to-orange-500' : 'bg-gray-400'
+                                }`}
+                                style={{ width: `${confidencePercent}%` }}
+                              />
+                            </div>
+                            <Button
+                              onClick={() => handleCopy(result.result)}
+                              size="sm"
+                              variant="secondary"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-white/5 rounded-lg px-3 py-2 border border-white/10">
+                          <div className="text-xs lg:text-sm font-mono text-gray-300 truncate">
+                            {result.result}
+                          </div>
+                        </div>
+                        
+                        {/* Enhanced Quality indicators */}
+                        <div className="flex flex-wrap gap-2 mt-3">
                           {result.result.toLowerCase().includes('harsha') && (
-                            <span className="text-xs bg-green-600/30 text-green-300 px-2 py-0.5 rounded">
+                            <span className="bg-green-500/20 text-green-300 text-xs px-2 py-1 rounded-full border border-green-500/30 flex items-center">
+                              <Sparkles className="h-3 w-3 mr-1" />
                               Contains "harsha"
                             </span>
                           )}
                           {result.result.toLowerCase().includes('hello') && (
-                            <span className="text-xs bg-green-600/30 text-green-300 px-2 py-0.5 rounded">
-                              Contains "hello"
+                            <span className="bg-green-500/20 text-green-300 text-xs px-2 py-1 rounded-full border border-green-500/30">
+                              ✓ Contains "hello"
                             </span>
                           )}
                           {/\b[A-Z][a-z]+\b/.test(result.result) && (
-                            <span className="text-xs bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded">
-                              Proper names
+                            <span className="bg-blue-500/20 text-blue-300 text-xs px-2 py-1 rounded-full border border-blue-500/30">
+                              👤 Proper names
                             </span>
                           )}
                           {/[.!?]/.test(result.result) && (
-                            <span className="text-xs bg-purple-600/30 text-purple-300 px-2 py-0.5 rounded">
-                              Sentences
+                            <span className="bg-purple-500/20 text-purple-300 text-xs px-2 py-1 rounded-full border border-purple-500/30">
+                              📝 Sentences
+                            </span>
+                          )}
+                          {isProvidedKey && (
+                            <span className="bg-blue-500/20 text-blue-300 text-xs px-2 py-1 rounded-full border border-blue-500/30 flex items-center">
+                              <Key className="h-3 w-3 mr-1" />
+                              Your key
                             </span>
                           )}
                         </div>
                       </div>
-                    ))}
-                    
-                    {filteredResults.length > 50 && (
-                      <div className="text-center py-2">
-                        <span className="text-sm text-gray-400">
-                          Showing first 50 results. {filteredResults.length - 50} more available.
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              </div>
+                    );
+                  })}
+                  
+                  {filteredResults.length > 50 && (
+                    <div className="text-center py-4">
+                      <span className="text-sm text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                        Showing top 50 results. {filteredResults.length - 50} more available.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </Card>
             </>
           )}
 
           {/* No Results */}
           {!isProcessing && results.length === 0 && inputText && (
-            <Card>
-              <div className="text-center py-12">
-                <AlertTriangle className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">No readable results found</h3>
-                <p className="text-gray-400">
+            <Card variant="glass">
+              <div className="text-center py-12 lg:py-16">
+                <AlertTriangle className="h-16 w-16 lg:h-20 lg:w-20 text-yellow-400 mx-auto mb-6" />
+                <h3 className="text-lg lg:text-xl font-medium text-white mb-4">No Readable Results Found</h3>
+                <p className="text-gray-400 max-w-md mx-auto">
                   The text might be encrypted with an unsupported algorithm, require a specific key,
                   or may not be encrypted at all.
                 </p>
@@ -491,34 +551,45 @@ export function EnhancedBruteForce() {
           )}
 
           {/* Information Card */}
-          <Card className="mt-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Enhanced Brute Force Features</h2>
+          <Card variant="gradient" className="mt-8">
+            <h2 className="text-xl lg:text-2xl font-semibold text-white mb-6">Enhanced Analysis Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div>
-                <h3 className="font-medium text-primary-400 mb-2">Key Support</h3>
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="font-medium text-primary-400 mb-3 flex items-center">
+                  <Key className="h-4 w-4 mr-2" />
+                  Smart Key Testing
+                </h3>
                 <ul className="text-sm text-gray-400 space-y-1">
                   <li>• Provided key tested first</li>
-                  <li>• Common passwords included</li>
+                  <li>• 25+ common passwords included</li>
                   <li>• Key variations for classical ciphers</li>
                   <li>• Prioritized results display</li>
                 </ul>
               </div>
-              <div>
-                <h3 className="font-medium text-primary-400 mb-2">Algorithm Coverage</h3>
+              
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="font-medium text-accent-400 mb-3 flex items-center">
+                  <Target className="h-4 w-4 mr-2" />
+                  Algorithm Coverage
+                </h3>
                 <ul className="text-sm text-gray-400 space-y-1">
-                  <li>• 100+ encryption algorithms</li>
+                  <li>• 84+ encryption algorithms</li>
                   <li>• Classical and modern ciphers</li>
                   <li>• Multiple encoding schemes</li>
                   <li>• Symmetric and asymmetric methods</li>
                 </ul>
               </div>
-              <div>
-                <h3 className="font-medium text-primary-400 mb-2">Smart Analysis</h3>
+              
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="font-medium text-purple-400 mb-3 flex items-center">
+                  <Brain className="h-4 w-4 mr-2" />
+                  Intelligent Analysis
+                </h3>
                 <ul className="text-sm text-gray-400 space-y-1">
-                  <li>• Confidence scoring system</li>
-                  <li>• Readability assessment</li>
-                  <li>• Common word detection</li>
-                  <li>• Pattern recognition</li>
+                  <li>• Percentage-based confidence scoring</li>
+                  <li>• Name and word recognition</li>
+                  <li>• Sentence structure detection</li>
+                  <li>• Quality ranking system</li>
                 </ul>
               </div>
             </div>

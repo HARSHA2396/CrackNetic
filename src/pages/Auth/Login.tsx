@@ -35,22 +35,22 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary-600/20 rounded-full">
-              <LogIn className="h-8 w-8 text-primary-400" />
+            <div className="p-4 bg-gradient-to-br from-primary-500/20 to-primary-600/20 rounded-2xl backdrop-blur-sm border border-white/10">
+              <LogIn className="h-10 w-10 text-primary-400" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-gray-400">Sign in to access protected features</p>
+          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">Welcome Back</h1>
+          <p className="text-gray-400 text-lg">Sign in to access professional features</p>
         </div>
 
-        <Card>
+        <Card variant="glass">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-4 bg-red-600/20 border border-red-600/30 rounded-lg">
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
                 <p className="text-red-400 text-sm">{error}</p>
               </div>
             )}
@@ -61,6 +61,7 @@ export function Login() {
               value={email}
               onChange={setEmail}
               placeholder="Enter your email"
+              icon={Mail}
               required
             />
 
@@ -70,6 +71,7 @@ export function Login() {
               value={password}
               onChange={setPassword}
               placeholder="Enter your password"
+              icon={Lock}
               required
             />
 
@@ -93,8 +95,8 @@ export function Login() {
           </div>
         </Card>
 
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-500 bg-white/5 rounded-xl px-4 py-2 border border-white/10">
             Demo: Use any email and password to login
           </p>
         </div>
