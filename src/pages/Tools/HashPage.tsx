@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Hash, Copy, Download } from 'lucide-react';
+import { Hash, Copy, Download, Shield, Sparkles } from 'lucide-react';
 import { Card } from '../../components/UI/Card';
 import { Button } from '../../components/UI/Button';
 import { Select } from '../../components/UI/Select';
@@ -16,8 +16,6 @@ const hashAlgorithms = [
   { value: 'sha384', label: 'SHA-384' },
   { value: 'sha512', label: 'SHA-512' },
   { value: 'ripemd160', label: 'RIPEMD-160' },
-  { value: 'whirlpool', label: 'Whirlpool' },
-  { value: 'blake2', label: 'BLAKE2' },
 ];
 
 export function HashPage() {
@@ -26,7 +24,6 @@ export function HashPage() {
   const [result, setResult] = useState<HashResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Get algorithm from URL params
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const algorithmParam = urlParams.get('algorithm');
@@ -36,13 +33,9 @@ export function HashPage() {
   }, []);
 
   const handleProcess = async () => {
-    if (!inputText || !algorithm) {
-      return;
-    }
+    if (!inputText || !algorithm) return;
 
     setIsProcessing(true);
-    
-    // Simulate processing delay for better UX
     await new Promise(resolve => setTimeout(resolve, 300));
     
     const hashResult = hashText(inputText, algorithm);
@@ -69,151 +62,166 @@ export function HashPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Header />
-      <div className="p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-4">Hash Functions</h1>
-            <p className="text-gray-400 text-lg">
-              Generate cryptographic hashes for data integrity verification
-            </p>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <div className="flex justify-center mb-6">
+            <div className="p-4 bg-gradient-to-br from-red-500/20 to-rose-500/20 rounded-2xl backdrop-blur-sm border border-white/10">
+              <Hash className="h-12 w-12 text-red-400" />
+            </div>
           </div>
+          <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+            <span className="bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">
+              Hash Functions
+            </span>
+          </h1>
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+            Generate cryptographic hashes for data integrity verification
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Input Section */}
-            <Card>
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <Hash className="h-5 w-5 mr-2 text-primary-400" />
-                Input Configuration
-              </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Input Section */}
+          <Card variant="glass">
+            <div className="flex items-center mb-6">
+              <Shield className="h-6 w-6 text-red-400 mr-3" />
+              <h2 className="text-2xl font-semibold text-white">Input Configuration</h2>
+            </div>
 
-              <div className="space-y-6">
-                <Select
-                  label="Hash Algorithm"
-                  value={algorithm}
-                  onChange={setAlgorithm}
-                  options={hashAlgorithms}
-                  placeholder="Select a hash algorithm"
-                />
+            <div className="space-y-6">
+              <Select
+                label="Hash Algorithm"
+                value={algorithm}
+                onChange={setAlgorithm}
+                options={hashAlgorithms}
+                placeholder="Select a hash algorithm"
+                required
+              />
 
-                <Textarea
-                  label="Text to Hash"
-                  value={inputText}
-                  onChange={setInputText}
-                  placeholder="Enter text to generate hash..."
-                  rows={8}
-                />
+              <Textarea
+                label="Text to Hash"
+                value={inputText}
+                onChange={setInputText}
+                placeholder="Enter text to generate hash..."
+                rows={8}
+                required
+              />
 
-                <Button
-                  onClick={handleProcess}
-                  loading={isProcessing}
-                  disabled={!inputText || !algorithm}
-                  className="w-full"
-                  size="lg"
-                  icon={Hash}
-                >
-                  Generate Hash
-                </Button>
-              </div>
-            </Card>
-
-            {/* Result Section */}
-            <Card>
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <Hash className="h-5 w-5 mr-2 text-accent-400" />
-                Hash Result
-              </h2>
-
-              {result ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">
-                      Algorithm: <span className="text-white">{result.algorithm.toUpperCase()}</span>
-                    </span>
-                    <div className="flex space-x-2">
-                      <Button
-                        onClick={handleCopy}
-                        size="sm"
-                        variant="secondary"
-                        icon={Copy}
-                      >
-                        Copy
-                      </Button>
-                      <Button
-                        onClick={handleDownload}
-                        size="sm"
-                        variant="secondary"
-                        icon={Download}
-                      >
-                        Download
-                      </Button>
-                    </div>
-                  </div>
-
-                  {result.success ? (
-                    <div className="space-y-4">
-                      <div className="bg-gray-700 rounded-lg p-4">
-                        <pre className="font-mono text-sm text-green-300 whitespace-pre-wrap break-all">
-                          {result.hash}
-                        </pre>
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        Hash length: {result.hash?.length} characters
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-red-600/20 border border-red-600/30 rounded-lg p-4">
-                      <p className="text-red-400 text-sm">
-                        <strong>Error:</strong> {result.error}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-700 rounded-full mb-4">
-                    <Hash className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-400">
-                    Select a hash algorithm and enter text to generate hash
-                  </p>
-                </div>
-              )}
-            </Card>
-          </div>
-
-          {/* Hash Information */}
-          <Card className="mt-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Hash Algorithm Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div>
-                <h3 className="font-medium text-primary-400 mb-2">Legacy Algorithms</h3>
-                <ul className="text-sm text-gray-400 space-y-1">
-                  <li>• MD5 - 128-bit hash (deprecated for security)</li>
-                  <li>• SHA-1 - 160-bit hash (deprecated for security)</li>
-                  <li>• RIPEMD-160 - 160-bit hash</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-medium text-primary-400 mb-2">SHA-2 Family</h3>
-                <ul className="text-sm text-gray-400 space-y-1">
-                  <li>• SHA-224 - 224-bit hash</li>
-                  <li>• SHA-256 - 256-bit hash (recommended)</li>
-                  <li>• SHA-384 - 384-bit hash</li>
-                  <li>• SHA-512 - 512-bit hash</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-medium text-primary-400 mb-2">Modern Algorithms</h3>
-                <ul className="text-sm text-gray-400 space-y-1">
-                  <li>• Whirlpool - 512-bit hash</li>
-                  <li>• BLAKE2 - High-speed cryptographic hash</li>
-                </ul>
-              </div>
+              <Button
+                onClick={handleProcess}
+                loading={isProcessing}
+                disabled={!inputText || !algorithm}
+                fullWidth
+                size="lg"
+                icon={Hash}
+                className="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600"
+              >
+                Generate Hash
+              </Button>
             </div>
           </Card>
+
+          {/* Result Section */}
+          <Card variant="glass">
+            <div className="flex items-center mb-6">
+              <Sparkles className="h-6 w-6 text-cyan-400 mr-3" />
+              <h2 className="text-2xl font-semibold text-white">Hash Result</h2>
+            </div>
+
+            {result ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">
+                    Algorithm: <span className="text-white font-medium">{result.algorithm.toUpperCase()}</span>
+                  </span>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleCopy}
+                      size="sm"
+                      variant="secondary"
+                      icon={Copy}
+                    >
+                      Copy
+                    </Button>
+                    <Button
+                      onClick={handleDownload}
+                      size="sm"
+                      variant="secondary"
+                      icon={Download}
+                    >
+                      Download
+                    </Button>
+                  </div>
+                </div>
+
+                {result.success ? (
+                  <div className="space-y-4">
+                    <div className="bg-slate-800/50 rounded-xl p-4 border border-green-500/20">
+                      <pre className="font-mono text-sm text-green-300 whitespace-pre-wrap break-all">
+                        {result.hash}
+                      </pre>
+                    </div>
+                    <div className="text-xs text-gray-400 text-center">
+                      Hash length: {result.hash?.length} characters
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+                    <p className="text-red-400 text-sm">
+                      <strong>Error:</strong> {result.error}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-white/5 rounded-2xl mb-6 border border-white/10">
+                  <Hash className="h-10 w-10 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-white mb-2">Ready to Hash</h3>
+                <p className="text-gray-400">
+                  Select a hash algorithm and enter text to generate hash
+                </p>
+              </div>
+            )}
+          </Card>
         </div>
+
+        {/* Hash Information */}
+        <Card variant="gradient" className="mt-12">
+          <h2 className="text-2xl font-semibold text-white mb-8 text-center">Hash Algorithm Information</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+              <h3 className="font-semibold text-red-400 mb-4">Legacy Algorithms</h3>
+              <ul className="text-sm text-gray-400 space-y-2">
+                <li>• MD5 - 128-bit hash (deprecated for security)</li>
+                <li>• SHA-1 - 160-bit hash (deprecated for security)</li>
+                <li>• RIPEMD-160 - 160-bit hash</li>
+              </ul>
+            </div>
+            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+              <h3 className="font-semibold text-yellow-400 mb-4">SHA-2 Family</h3>
+              <ul className="text-sm text-gray-400 space-y-2">
+                <li>• SHA-224 - 224-bit hash</li>
+                <li>• SHA-256 - 256-bit hash (recommended)</li>
+                <li>• SHA-384 - 384-bit hash</li>
+                <li>• SHA-512 - 512-bit hash</li>
+              </ul>
+            </div>
+            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+              <h3 className="font-semibold text-green-400 mb-4">Use Cases</h3>
+              <ul className="text-sm text-gray-400 space-y-2">
+                <li>• Data integrity verification</li>
+                <li>• Password storage</li>
+                <li>• Digital signatures</li>
+                <li>• Blockchain applications</li>
+              </ul>
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );

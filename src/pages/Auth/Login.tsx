@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock } from 'lucide-react';
+import { LogIn, Mail, Lock, Shield, Sparkles } from 'lucide-react';
 import { Card } from '../../components/UI/Card';
 import { Button } from '../../components/UI/Button';
 import { Input } from '../../components/UI/Input';
@@ -35,15 +35,23 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
+        {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-4 bg-gradient-to-br from-primary-500/20 to-primary-600/20 rounded-2xl backdrop-blur-sm border border-white/10">
-              <LogIn className="h-10 w-10 text-primary-400" />
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl backdrop-blur-sm border border-white/10">
+                <Shield className="h-12 w-12 text-blue-400" />
+              </div>
+              <div className="absolute -top-2 -right-2">
+                <Sparkles className="h-6 w-6 text-cyan-400 animate-bounce" />
+              </div>
             </div>
           </div>
-          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">Welcome Back</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">
+            Welcome to <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Cracknetic</span>
+          </h1>
           <p className="text-gray-400 text-lg">Sign in to access professional features</p>
         </div>
 
@@ -78,7 +86,7 @@ export function Login() {
             <Button
               type="submit"
               loading={isLoading}
-              className="w-full"
+              fullWidth
               size="lg"
             >
               Sign In
@@ -88,7 +96,7 @@ export function Login() {
           <div className="mt-6 text-center">
             <p className="text-gray-400">
               Don't have an account?{' '}
-              <Link to="/register" className="text-primary-400 hover:text-primary-300 font-medium">
+              <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
                 Sign up here
               </Link>
             </p>
@@ -96,8 +104,8 @@ export function Login() {
         </Card>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500 bg-white/5 rounded-xl px-4 py-2 border border-white/10">
-            Demo: Use any email and password to login
+          <p className="text-sm text-gray-500 bg-white/5 rounded-xl px-4 py-3 border border-white/10">
+            💡 Demo: Use any email and password to login
           </p>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronDown } from 'lucide-react';
 
 interface SelectOption {
   value: string;
@@ -13,6 +14,7 @@ interface SelectProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  required?: boolean;
 }
 
 export function Select({
@@ -23,33 +25,40 @@ export function Select({
   placeholder,
   disabled = false,
   className = '',
+  required = false,
 }: SelectProps) {
   return (
     <div className={`w-full ${className}`}>
       {label && (
         <label className="block text-sm font-medium text-white mb-2">
-          {label}
+          {label} {required && <span className="text-red-400">*</span>}
         </label>
       )}
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        className={`w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 ${
-          disabled ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
-      >
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        )}
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          required={required}
+          className={`w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none ${
+            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+          }`}
+        >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
+          {options.map((option) => (
+            <option key={option.value} value={option.value} className="bg-slate-800 text-white">
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+          <ChevronDown className="h-5 w-5 text-gray-400" />
+        </div>
+      </div>
     </div>
   );
 }

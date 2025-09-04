@@ -1,4 +1,5 @@
 import React from 'react';
+import { LucideIcon } from 'lucide-react';
 
 interface InputProps {
   label?: string;
@@ -10,7 +11,8 @@ interface InputProps {
   disabled?: boolean;
   className?: string;
   error?: string;
-  icon?: React.ComponentType<any>;
+  icon?: LucideIcon;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export function Input({
@@ -24,7 +26,14 @@ export function Input({
   className = '',
   error,
   icon: Icon,
+  size = 'md',
 }: InputProps) {
+  const sizeClasses = {
+    sm: 'py-2 text-sm',
+    md: 'py-3 text-base',
+    lg: 'py-4 text-lg',
+  };
+
   return (
     <div className={`w-full ${className}`}>
       {label && (
@@ -34,7 +43,7 @@ export function Input({
       )}
       <div className="relative">
         {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Icon className="h-5 w-5 text-gray-400" />
           </div>
         )}
@@ -45,12 +54,12 @@ export function Input({
           placeholder={placeholder}
           required={required}
           disabled={disabled}
-          className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 ${
+          className={`w-full ${Icon ? 'pl-12' : 'pl-4'} pr-4 ${sizeClasses[size]} bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
             error ? 'border-red-500 focus:ring-red-500' : 'border-white/20'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
       </div>
-      {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
     </div>
   );
 }
