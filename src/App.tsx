@@ -5,7 +5,7 @@ import { Layout } from './components/Layout/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Pages
-import { Home } from './pages/Home';
+import Home from './pages/Home';
 import { Login } from './pages/Auth/Login';
 import { Register } from './pages/Auth/Register';
 import { EncryptDecrypt } from './pages/Tools/EncryptDecrypt';
