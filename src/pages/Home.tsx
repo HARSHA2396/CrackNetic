@@ -23,7 +23,7 @@ const features = [
   {
     icon: Lock,
     title: 'Encryption & Decryption',
-    description: 'Encrypt and decrypt text using 84+ algorithms including AES, RSA, DES, and classical ciphers',
+    description: 'Encrypt and decrypt with 84+ algorithms: AES, RSA, DES, classical ciphers, and post-quantum cryptography',
     path: '/encrypt',
     color: 'from-blue-500 to-cyan-500',
     bgColor: 'bg-blue-500/10',
@@ -59,7 +59,7 @@ const features = [
   {
     icon: Hash,
     title: 'Hash Functions',
-    description: 'Generate cryptographic hashes using MD5, SHA-256, SHA-512, and modern algorithms',
+    description: 'Generate hashes with 21+ algorithms: SHA family, BLAKE, Keccak, HMAC, PBKDF2, bcrypt, Argon2',
     path: '/hash',
     color: 'from-red-500 to-rose-500',
     bgColor: 'bg-red-500/10',
@@ -68,7 +68,7 @@ const features = [
   {
     icon: Binary,
     title: 'Encoding Tools',
-    description: 'Convert between Base64, Hex, Binary, URL encoding, and other formats',
+    description: 'Convert between 14+ formats: Base64/32/58/85/91, Hex, Binary, URL, HTML, Punycode',
     path: '/encode',
     color: 'from-indigo-500 to-blue-500',
     bgColor: 'bg-indigo-500/10',
