@@ -5,31 +5,62 @@ import { Button } from '../../components/UI/Button';
 import { Select } from '../../components/UI/Select';
 import { Textarea } from '../../components/UI/Textarea';
 import { Header } from '../../components/Layout/Header';
-import { encodeText, decodeText } from '../../utils/encodingAlgorithms';
+import { encodeTextEnhanced, decodeTextEnhanced } from '../../utils/enhancedEncodingAlgorithms';
 import { EncodingResult } from '../../types/crypto';
 
-const encodingAlgorithms = [
-  { value: 'base64', label: 'Base64' },
-  { value: 'base32', label: 'Base32' },
-  { value: 'base58', label: 'Base58' },
-  { value: 'hex', label: 'Hexadecimal' },
-  { value: 'binary', label: 'Binary' },
-  { value: 'url', label: 'URL Encoding' },
-  { value: 'ascii', label: 'ASCII Converter' },
+const encodingCategories = [
+  {
+    name: 'Base Encodings',
+    algorithms: [
+      { value: 'base64', label: 'Base64' },
+      { value: 'base32', label: 'Base32' },
+      { value: 'base58', label: 'Base58' },
+      { value: 'base85', label: 'Base85 (ASCII85)' },
+      { value: 'base91', label: 'Base91' },
+    ]
+  },
+  {
+    name: 'Number Systems',
+    algorithms: [
+      { value: 'hex', label: 'Hexadecimal' },
+      { value: 'binary', label: 'Binary' },
+      { value: 'octal', label: 'Octal' },
+      { value: 'ascii', label: 'ASCII Converter' },
+    ]
+  },
+  {
+    name: 'Web Encodings',
+    algorithms: [
+      { value: 'url', label: 'URL Encoding' },
+      { value: 'html', label: 'HTML Entities' },
+      { value: 'punycode', label: 'Punycode' },
+      { value: 'quoted-printable', label: 'Quoted-Printable' },
+      { value: 'uuencode', label: 'UUEncoding' },
+    ]
+  }
 ];
+
+const allEncodingAlgorithms = encodingCategories.flatMap(cat => cat.algorithms);
 
 export function EncodingPage() {
   const [inputText, setInputText] = useState('');
   const [algorithm, setAlgorithm] = useState('');
   const [operation, setOperation] = useState<'encode' | 'decode'>('encode');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [result, setResult] = useState<EncodingResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const algorithmParam = urlParams.get('algorithm');
-    if (algorithmParam && encodingAlgorithms.find(alg => alg.value === algorithmParam)) {
+    if (algorithmParam && allEncodingAlgorithms.find(alg => alg.value === algorithmParam)) {
       setAlgorithm(algorithmParam);
+      const category = encodingCategories.find(cat => 
+        cat.algorithms.some(alg => alg.value === algorithmParam)
+      );
+      if (category) {
+        setSelectedCategory(category.name);
+      }
     }
   }, []);
 
@@ -40,8 +71,8 @@ export function EncodingPage() {
     await new Promise(resolve => setTimeout(resolve, 300));
     
     const processResult = operation === 'encode' 
-      ? encodeText(inputText, algorithm)
-      : decodeText(inputText, algorithm);
+      ? encodeTextEnhanced(inputText, algorithm)
+      : decodeTextEnhanced(inputText, algorithm);
     
     setResult(processResult);
     setIsProcessing(false);
@@ -65,6 +96,10 @@ export function EncodingPage() {
     }
   };
 
+  const filteredAlgorithms = selectedCategory 
+    ? encodingCategories.find(cat => cat.name === selectedCategory)?.algorithms || []
+    : allEncodingAlgorithms;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Header />
@@ -83,7 +118,7 @@ export function EncodingPage() {
             </span>
           </h1>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Convert text between different encoding formats
+            Convert text between 14+ different encoding formats
           </p>
         </div>
 
@@ -115,11 +150,22 @@ export function EncodingPage() {
               </div>
 
               <Select
+                label="Encoding Category"
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                options={[
+                  { value: '', label: 'All Encodings (14+)' },
+                  ...encodingCategories.map(cat => ({ value: cat.name, label: cat.name }))
+                ]}
+                placeholder="Select a category to filter encodings"
+              />
+
+              <Select
                 label="Encoding Format"
                 value={algorithm}
                 onChange={setAlgorithm}
-                options={encodingAlgorithms}
-                placeholder="Select an encoding format"
+                options={filteredAlgorithms}
+                placeholder={`Select from ${filteredAlgorithms.length} available formats`}
                 required
               />
 
@@ -209,31 +255,21 @@ export function EncodingPage() {
 
         {/* Encoding Information */}
         <Card variant="gradient" className="mt-12">
-          <h2 className="text-2xl font-semibold text-white mb-8 text-center">Encoding Information</h2>
+          <h2 className="text-2xl font-semibold text-white mb-8 text-center">Encoding Categories</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h3 className="font-semibold text-indigo-400 mb-4">Base Encodings</h3>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li>• Base64 - Binary-to-text encoding</li>
-                <li>• Base32 - 32-character alphabet encoding</li>
-                <li>• Base58 - Bitcoin-style encoding</li>
-              </ul>
-            </div>
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h3 className="font-semibold text-blue-400 mb-4">Number Systems</h3>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li>• Hexadecimal - Base-16 representation</li>
-                <li>• Binary - Base-2 representation</li>
-                <li>• ASCII - Character code conversion</li>
-              </ul>
-            </div>
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h3 className="font-semibold text-cyan-400 mb-4">Web Encodings</h3>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li>• URL Encoding - Percent encoding for URLs</li>
-                <li>• HTML Entities - Character entity references</li>
-              </ul>
-            </div>
+            {encodingCategories.map((category, index) => (
+              <div key={index} className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="font-semibold text-indigo-400 mb-4">{category.name}</h3>
+                <div className="space-y-2">
+                  {category.algorithms.map((alg) => (
+                    <div key={alg.value} className="text-sm text-gray-400 flex items-center">
+                      <div className="w-2 h-2 bg-indigo-400 rounded-full mr-3"></div>
+                      {alg.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
       </div>

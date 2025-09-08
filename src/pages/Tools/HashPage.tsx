@@ -4,31 +4,90 @@ import { Card } from '../../components/UI/Card';
 import { Button } from '../../components/UI/Button';
 import { Select } from '../../components/UI/Select';
 import { Textarea } from '../../components/UI/Textarea';
+import { Input } from '../../components/UI/Input';
 import { Header } from '../../components/Layout/Header';
-import { hashText } from '../../utils/hashAlgorithms';
+import { hashTextEnhanced } from '../../utils/enhancedHashAlgorithms';
 import { HashResult } from '../../types/crypto';
 
-const hashAlgorithms = [
-  { value: 'md5', label: 'MD5' },
-  { value: 'sha1', label: 'SHA-1' },
-  { value: 'sha224', label: 'SHA-224' },
-  { value: 'sha256', label: 'SHA-256' },
-  { value: 'sha384', label: 'SHA-384' },
-  { value: 'sha512', label: 'SHA-512' },
-  { value: 'ripemd160', label: 'RIPEMD-160' },
+const hashCategories = [
+  {
+    name: 'SHA Family',
+    algorithms: [
+      { value: 'sha1', label: 'SHA-1' },
+      { value: 'sha224', label: 'SHA-224' },
+      { value: 'sha256', label: 'SHA-256' },
+      { value: 'sha384', label: 'SHA-384' },
+      { value: 'sha512', label: 'SHA-512' },
+    ]
+  },
+  {
+    name: 'SHA-3 & Keccak',
+    algorithms: [
+      { value: 'sha3-224', label: 'SHA3-224' },
+      { value: 'sha3-256', label: 'SHA3-256' },
+      { value: 'sha3-384', label: 'SHA3-384' },
+      { value: 'sha3-512', label: 'SHA3-512' },
+      { value: 'keccak-256', label: 'Keccak-256' },
+      { value: 'keccak-384', label: 'Keccak-384' },
+      { value: 'keccak-512', label: 'Keccak-512' },
+    ]
+  },
+  {
+    name: 'Modern Hash Functions',
+    algorithms: [
+      { value: 'blake2b', label: 'BLAKE2b' },
+      { value: 'blake2s', label: 'BLAKE2s' },
+      { value: 'blake3', label: 'BLAKE3' },
+      { value: 'whirlpool', label: 'Whirlpool' },
+    ]
+  },
+  {
+    name: 'Legacy Hash Functions',
+    algorithms: [
+      { value: 'md5', label: 'MD5' },
+      { value: 'ripemd160', label: 'RIPEMD-160' },
+    ]
+  },
+  {
+    name: 'HMAC (Keyed Hash)',
+    algorithms: [
+      { value: 'hmac-md5', label: 'HMAC-MD5' },
+      { value: 'hmac-sha1', label: 'HMAC-SHA1' },
+      { value: 'hmac-sha256', label: 'HMAC-SHA256' },
+      { value: 'hmac-sha512', label: 'HMAC-SHA512' },
+    ]
+  },
+  {
+    name: 'Password Hashing',
+    algorithms: [
+      { value: 'pbkdf2', label: 'PBKDF2' },
+      { value: 'bcrypt', label: 'bcrypt' },
+      { value: 'argon2', label: 'Argon2' },
+    ]
+  }
 ];
+
+const allHashAlgorithms = hashCategories.flatMap(cat => cat.algorithms);
 
 export function HashPage() {
   const [inputText, setInputText] = useState('');
   const [algorithm, setAlgorithm] = useState('');
+  const [key, setKey] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [result, setResult] = useState<HashResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const algorithmParam = urlParams.get('algorithm');
-    if (algorithmParam && hashAlgorithms.find(alg => alg.value === algorithmParam)) {
+    if (algorithmParam && allHashAlgorithms.find(alg => alg.value === algorithmParam)) {
       setAlgorithm(algorithmParam);
+      const category = hashCategories.find(cat => 
+        cat.algorithms.some(alg => alg.value === algorithmParam)
+      );
+      if (category) {
+        setSelectedCategory(category.name);
+      }
     }
   }, []);
 
@@ -38,7 +97,7 @@ export function HashPage() {
     setIsProcessing(true);
     await new Promise(resolve => setTimeout(resolve, 300));
     
-    const hashResult = hashText(inputText, algorithm);
+    const hashResult = hashTextEnhanced(inputText, algorithm, key || undefined);
     setResult(hashResult);
     setIsProcessing(false);
   };
@@ -61,6 +120,12 @@ export function HashPage() {
     }
   };
 
+  const needsKey = ['hmac-md5', 'hmac-sha1', 'hmac-sha256', 'hmac-sha512', 'pbkdf2', 'argon2'].includes(algorithm);
+
+  const filteredAlgorithms = selectedCategory 
+    ? hashCategories.find(cat => cat.name === selectedCategory)?.algorithms || []
+    : allHashAlgorithms;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Header />
@@ -79,7 +144,7 @@ export function HashPage() {
             </span>
           </h1>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Generate cryptographic hashes for data integrity verification
+            Generate cryptographic hashes with 21+ algorithms for data integrity
           </p>
         </div>
 
@@ -93,13 +158,34 @@ export function HashPage() {
 
             <div className="space-y-6">
               <Select
+                label="Hash Category"
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                options={[
+                  { value: '', label: 'All Hash Functions (21+)' },
+                  ...hashCategories.map(cat => ({ value: cat.name, label: cat.name }))
+                ]}
+                placeholder="Select a category to filter algorithms"
+              />
+
+              <Select
                 label="Hash Algorithm"
                 value={algorithm}
                 onChange={setAlgorithm}
-                options={hashAlgorithms}
-                placeholder="Select a hash algorithm"
+                options={filteredAlgorithms}
+                placeholder={`Select from ${filteredAlgorithms.length} available algorithms`}
                 required
               />
+
+              {needsKey && (
+                <Input
+                  label="Key/Salt"
+                  value={key}
+                  onChange={setKey}
+                  placeholder="Enter key for HMAC or salt for PBKDF2/Argon2"
+                  required
+                />
+              )}
 
               <Textarea
                 label="Text to Hash"
@@ -113,7 +199,7 @@ export function HashPage() {
               <Button
                 onClick={handleProcess}
                 loading={isProcessing}
-                disabled={!inputText || !algorithm}
+                disabled={!inputText || !algorithm || (needsKey && !key)}
                 fullWidth
                 size="lg"
                 icon={Hash}
@@ -192,34 +278,21 @@ export function HashPage() {
 
         {/* Hash Information */}
         <Card variant="gradient" className="mt-12">
-          <h2 className="text-2xl font-semibold text-white mb-8 text-center">Hash Algorithm Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h3 className="font-semibold text-red-400 mb-4">Legacy Algorithms</h3>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li>• MD5 - 128-bit hash (deprecated for security)</li>
-                <li>• SHA-1 - 160-bit hash (deprecated for security)</li>
-                <li>• RIPEMD-160 - 160-bit hash</li>
-              </ul>
-            </div>
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h3 className="font-semibold text-yellow-400 mb-4">SHA-2 Family</h3>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li>• SHA-224 - 224-bit hash</li>
-                <li>• SHA-256 - 256-bit hash (recommended)</li>
-                <li>• SHA-384 - 384-bit hash</li>
-                <li>• SHA-512 - 512-bit hash</li>
-              </ul>
-            </div>
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h3 className="font-semibold text-green-400 mb-4">Use Cases</h3>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li>• Data integrity verification</li>
-                <li>• Password storage</li>
-                <li>• Digital signatures</li>
-                <li>• Blockchain applications</li>
-              </ul>
-            </div>
+          <h2 className="text-2xl font-semibold text-white mb-8 text-center">Hash Algorithm Categories</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {hashCategories.map((category, index) => (
+              <div key={index} className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="font-semibold text-red-400 mb-4">{category.name}</h3>
+                <div className="space-y-2">
+                  {category.algorithms.map((alg) => (
+                    <div key={alg.value} className="text-sm text-gray-400 flex items-center">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mr-3"></div>
+                      {alg.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
       </div>
